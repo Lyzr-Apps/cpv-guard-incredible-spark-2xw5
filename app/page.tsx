@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
-import { callAIAgent } from '@/lib/aiAgent'
+import { callAIAgent, uploadFiles } from '@/lib/aiAgent'
 import parseLLMJson from '@/lib/jsonParser'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -851,16 +851,25 @@ function BMRReviewScreen({
     setParamValues(prev => ({ ...prev, [paramName]: value }))
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadedFileName, setUploadedFileName] = useState('')
+  const [uploadedAssets, setUploadedAssets] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string
-      setFileContent(text ?? '')
+    const fileName = file.name.toLowerCase()
+    setUploadedFileName(file.name)
+    setError('')
 
-      if (file.name.endsWith('.csv')) {
+    // For CSV files, parse content and auto-populate parameter values
+    if (fileName.endsWith('.csv')) {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        const text = ev.target?.result as string
+        setFileContent(text ?? '')
+
         try {
           const lines = text.split('\n').filter(l => l.trim())
           if (lines.length > 1) {
@@ -884,8 +893,55 @@ function BMRReviewScreen({
           setError('Failed to parse CSV file. Please check the format (parameter,value).')
         }
       }
+      reader.readAsText(file)
+    } else if (fileName.endsWith('.xlsx')) {
+      // XLSX files - upload as asset for the agent to process
+      setUploading(true)
+      try {
+        const uploadResult = await uploadFiles(file)
+        if (uploadResult.success && uploadResult.asset_ids.length > 0) {
+          setUploadedAssets(uploadResult.asset_ids)
+          setFileContent(`[Uploaded XLSX file: ${file.name}]`)
+        } else {
+          setError('Failed to upload XLSX file. Please try again.')
+        }
+      } catch {
+        setError('Error uploading file. Please try again.')
+      }
+      setUploading(false)
+    } else if (fileName.endsWith('.pdf')) {
+      // PDF files - upload as asset for the agent to analyze
+      setUploading(true)
+      try {
+        const uploadResult = await uploadFiles(file)
+        if (uploadResult.success && uploadResult.asset_ids.length > 0) {
+          setUploadedAssets(uploadResult.asset_ids)
+          setFileContent(`[Uploaded PDF file: ${file.name}]`)
+        } else {
+          setError('Failed to upload PDF file. Please try again.')
+        }
+      } catch {
+        setError('Error uploading file. Please try again.')
+      }
+      setUploading(false)
+    } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png')) {
+      // Image files - upload as asset for the agent to analyze
+      setUploading(true)
+      try {
+        const uploadResult = await uploadFiles(file)
+        if (uploadResult.success && uploadResult.asset_ids.length > 0) {
+          setUploadedAssets(uploadResult.asset_ids)
+          setFileContent(`[Uploaded image file: ${file.name}]`)
+        } else {
+          setError('Failed to upload image file. Please try again.')
+        }
+      } catch {
+        setError('Error uploading file. Please try again.')
+      }
+      setUploading(false)
+    } else {
+      setError('Unsupported file format. Please upload CSV, XLSX, PDF, JPG, or PNG files.')
     }
-    reader.readAsText(file)
   }
 
   const handleRunCheck = async () => {
@@ -916,7 +972,11 @@ function BMRReviewScreen({
           return `- ${p.parameter_name}: measured_value=${val} ${p.unit}, lower_limit=${p.lower_limit}, upper_limit=${p.upper_limit}, target_value=${p.target_value}`
         }).join('\n')
       } else {
-        paramDataStr = `File data:\n${fileContent}\n\nConfigured limits for ${selectedStage}:\n` + stageParams.map(p => `- ${p.parameter_name}: lower_limit=${p.lower_limit}, upper_limit=${p.upper_limit} ${p.unit}, target_value=${p.target_value}`).join('\n')
+        if (uploadedAssets.length > 0) {
+          paramDataStr = `An uploaded file (${uploadedFileName}) has been attached for analysis. Please extract the parameter values from it.\n\nConfigured limits for ${selectedStage}:\n` + stageParams.map(p => `- ${p.parameter_name}: lower_limit=${p.lower_limit}, upper_limit=${p.upper_limit} ${p.unit}, target_value=${p.target_value}`).join('\n')
+        } else {
+          paramDataStr = `File data:\n${fileContent}\n\nConfigured limits for ${selectedStage}:\n` + stageParams.map(p => `- ${p.parameter_name}: lower_limit=${p.lower_limit}, upper_limit=${p.upper_limit} ${p.unit}, target_value=${p.target_value}`).join('\n')
+        }
       }
 
       const message = `Analyze the following BMR compliance data for batch "${batchId}", manufacturing stage "${selectedStage}".
@@ -940,7 +1000,8 @@ Return the complete analysis as a JSON object with these fields:
 - trend_analysis: array of { parameter_name, trend_type, description, risk_level }
 - anomalies: array of { parameter_name, anomaly_type, description, severity }`
 
-      const result = await callAIAgent(message, BMR_AGENT_ID)
+      const agentOptions = uploadedAssets.length > 0 ? { assets: uploadedAssets } : undefined
+      const result = await callAIAgent(message, BMR_AGENT_ID, agentOptions)
 
       if (result.success) {
         const parsed = parseAgentResponse(result)
@@ -1058,14 +1119,31 @@ Return the complete analysis as a JSON object with these fields:
                 <div className="space-y-3">
                   <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fileInputRef.current?.click()}>
                     <FiUpload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground font-sans">Click to upload CSV file</p>
-                    <p className="text-xs text-muted-foreground mt-1 font-sans">Expected columns: parameter, value</p>
-                    <input ref={fileInputRef} type="file" accept=".csv,.xlsx" className="hidden" onChange={handleFileUpload} />
+                    {uploading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground font-sans">Uploading file...</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground font-sans">Click to upload file</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-sans">Supported: CSV, XLSX, PDF, JPG, PNG</p>
+                      </>
+                    )}
+                    <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleFileUpload} />
                   </div>
                   {fileContent && (
                     <div className="flex items-center gap-2 p-2 rounded bg-green-50 border border-green-200 text-xs text-green-700 font-sans">
                       <FiCheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>File loaded - {fileContent.split('\n').length} lines detected</span>
+                      <span className="flex-1">
+                        {uploadedFileName && (uploadedFileName.toLowerCase().endsWith('.pdf') || uploadedFileName.toLowerCase().endsWith('.jpg') || uploadedFileName.toLowerCase().endsWith('.jpeg') || uploadedFileName.toLowerCase().endsWith('.png') || uploadedFileName.toLowerCase().endsWith('.xlsx'))
+                          ? `${uploadedFileName} uploaded successfully`
+                          : `File loaded - ${fileContent.split('\n').length} lines detected`
+                        }
+                      </span>
+                      <button className="text-green-600 hover:text-green-800 flex-shrink-0" onClick={(e) => { e.stopPropagation(); setFileContent(''); setUploadedFileName(''); setUploadedAssets([]); if (fileInputRef.current) fileInputRef.current.value = ''; }}>
+                        <FiX className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   )}
                 </div>
