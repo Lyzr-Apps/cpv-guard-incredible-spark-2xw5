@@ -1,0 +1,50 @@
+{
+  "agent_name": "BMR Compliance Analyzer Agent",
+  "agent_id": "699f4fa1f2130afa9fdb13a7",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "batch_id": "string",
+    "stage": "string",
+    "analysis_timestamp": "string",
+    "summary": {
+      "total_parameters_checked": "number",
+      "critical_count": "number",
+      "major_count": "number",
+      "minor_count": "number",
+      "pass_count": "number",
+      "missing_count": "number",
+      "overall_status": "string"
+    },
+    "parameter_results": [
+      {
+        "parameter_name": "string",
+        "unit": "string",
+        "measured_value": "string",
+        "lower_limit": "string",
+        "upper_limit": "string",
+        "target_value": "string",
+        "status": "string",
+        "severity": "string",
+        "deviation_notes": "string"
+      }
+    ],
+    "trend_analysis": [
+      {
+        "parameter_name": "string",
+        "trend_type": "string",
+        "description": "string",
+        "risk_level": "string"
+      }
+    ],
+    "anomalies": [
+      {
+        "parameter_name": "string",
+        "anomaly_type": "string",
+        "description": "string",
+        "severity": "string"
+      }
+    ]
+  }
+}

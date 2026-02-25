@@ -1,0 +1,30 @@
+{
+  "agents": [
+    {
+      "agent_id": "699f4fa1f2130afa9fdb13a7",
+      "name": "BMR Compliance Analyzer Agent",
+      "node_id": "bmr_analyzer",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "agent_type": "json",
+      "has_knowledge_base": false,
+      "has_voice": false,
+      "has_image_output": false,
+      "has_file_output": false
+    },
+    {
+      "agent_id": "699f4fbef2130afa9fdb13a9",
+      "name": "Compliance Report Agent",
+      "node_id": "report_agent",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5",
+      "agent_type": "json",
+      "has_knowledge_base": false,
+      "has_voice": false,
+      "has_image_output": false,
+      "has_file_output": false
+    }
+  ],
+  "workflow_pattern": "sequential",
+  "total_agents": 2
+}

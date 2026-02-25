@@ -1,0 +1,49 @@
+{
+  "agent_name": "Compliance Report Agent",
+  "agent_id": "699f4fbef2130afa9fdb13a9",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "report_id": "string",
+    "batch_id": "string",
+    "generated_at": "string",
+    "executive_summary": {
+      "overall_status": "string",
+      "risk_assessment": "string",
+      "key_findings": "string",
+      "batch_disposition_recommendation": "string"
+    },
+    "stage_findings": [
+      {
+        "stage_name": "string",
+        "status": "string",
+        "critical_flags": "number",
+        "major_flags": "number",
+        "minor_flags": "number",
+        "findings_detail": "string",
+        "cross_stage_correlations": "string"
+      }
+    ],
+    "historical_comparison": {
+      "previous_batches_compared": "number",
+      "trend_direction": "string",
+      "comparison_notes": "string"
+    },
+    "recommendations": [
+      {
+        "priority": "number",
+        "severity": "string",
+        "affected_parameters": "string",
+        "action": "string",
+        "timeline": "string"
+      }
+    ],
+    "cfr_part_11_notes": {
+      "electronic_record_integrity": "string",
+      "audit_trail_observations": "string",
+      "data_integrity_flags": "string",
+      "signature_requirements": "string"
+    }
+  }
+}

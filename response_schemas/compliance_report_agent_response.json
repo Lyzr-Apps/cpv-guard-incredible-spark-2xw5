@@ -1,0 +1,100 @@
+{
+  "agent_name": "Compliance Report Agent",
+  "agent_id": "699f4fbef2130afa9fdb13a9",
+  "description": "Generates formal compliance summaries from analysis results. Performs cross-stage correlation, historical comparison against previous batches, and produces prioritized actionable recommendations with 21 CFR Part 11 documentation notes.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "report_id": "string",
+    "batch_id": "string",
+    "generated_at": "string",
+    "executive_summary": {
+      "overall_status": "string",
+      "risk_assessment": "string",
+      "key_findings": "string",
+      "batch_disposition_recommendation": "string"
+    },
+    "stage_findings": [
+      {
+        "stage_name": "string",
+        "status": "string",
+        "critical_flags": "number",
+        "major_flags": "number",
+        "minor_flags": "number",
+        "findings_detail": "string",
+        "cross_stage_correlations": "string"
+      }
+    ],
+    "historical_comparison": {
+      "previous_batches_compared": "number",
+      "trend_direction": "string",
+      "comparison_notes": "string"
+    },
+    "recommendations": [
+      {
+        "priority": "number",
+        "severity": "string",
+        "affected_parameters": "string",
+        "action": "string",
+        "timeline": "string"
+      }
+    ],
+    "cfr_part_11_notes": {
+      "electronic_record_integrity": "string",
+      "audit_trail_observations": "string",
+      "data_integrity_flags": "string",
+      "signature_requirements": "string"
+    }
+  },
+  "example_response": {
+    "report_id": "sample string",
+    "batch_id": "sample string",
+    "generated_at": "sample string",
+    "executive_summary": {
+      "overall_status": "sample string",
+      "risk_assessment": "sample string",
+      "key_findings": "sample string",
+      "batch_disposition_recommendation": "sample string"
+    },
+    "stage_findings": [
+      {
+        "stage_name": "sample string",
+        "status": "sample string",
+        "critical_flags": 0,
+        "major_flags": 0,
+        "minor_flags": 0,
+        "findings_detail": "sample string",
+        "cross_stage_correlations": "sample string"
+      }
+    ],
+    "historical_comparison": {
+      "previous_batches_compared": 0,
+      "trend_direction": "sample string",
+      "comparison_notes": "sample string"
+    },
+    "recommendations": [
+      {
+        "priority": 0,
+        "severity": "sample string",
+        "affected_parameters": "sample string",
+        "action": "sample string",
+        "timeline": "sample string"
+      }
+    ],
+    "cfr_part_11_notes": {
+      "electronic_record_integrity": "sample string",
+      "audit_trail_observations": "sample string",
+      "data_integrity_flags": "sample string",
+      "signature_requirements": "sample string"
+    }
+  },
+  "has_module_outputs": true,
+  "module_outputs_example": {
+    "artifact_files": [
+      {
+        "file_url": "https://example.com/file.pdf"
+      }
+    ]
+  }
+}

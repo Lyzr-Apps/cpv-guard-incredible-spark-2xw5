@@ -1,0 +1,94 @@
+{
+  "agent_name": "BMR Compliance Analyzer Agent",
+  "agent_id": "699f4fa1f2130afa9fdb13a7",
+  "description": "Analyzes submitted BMR stage data against configured specification limits. Detects out-of-limit values, missing entries, anomalous patterns, and trend deviations. Returns structured findings with severity classification (Critical/Major/Minor) for each parameter.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "batch_id": "string",
+    "stage": "string",
+    "analysis_timestamp": "string",
+    "summary": {
+      "total_parameters_checked": "number",
+      "critical_count": "number",
+      "major_count": "number",
+      "minor_count": "number",
+      "pass_count": "number",
+      "missing_count": "number",
+      "overall_status": "string"
+    },
+    "parameter_results": [
+      {
+        "parameter_name": "string",
+        "unit": "string",
+        "measured_value": "string",
+        "lower_limit": "string",
+        "upper_limit": "string",
+        "target_value": "string",
+        "status": "string",
+        "severity": "string",
+        "deviation_notes": "string"
+      }
+    ],
+    "trend_analysis": [
+      {
+        "parameter_name": "string",
+        "trend_type": "string",
+        "description": "string",
+        "risk_level": "string"
+      }
+    ],
+    "anomalies": [
+      {
+        "parameter_name": "string",
+        "anomaly_type": "string",
+        "description": "string",
+        "severity": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "batch_id": "sample string",
+    "stage": "sample string",
+    "analysis_timestamp": "sample string",
+    "summary": {
+      "total_parameters_checked": 0,
+      "critical_count": 0,
+      "major_count": 0,
+      "minor_count": 0,
+      "pass_count": 0,
+      "missing_count": 0,
+      "overall_status": "sample string"
+    },
+    "parameter_results": [
+      {
+        "parameter_name": "sample string",
+        "unit": "sample string",
+        "measured_value": "sample string",
+        "lower_limit": "sample string",
+        "upper_limit": "sample string",
+        "target_value": "sample string",
+        "status": "sample string",
+        "severity": "sample string",
+        "deviation_notes": "sample string"
+      }
+    ],
+    "trend_analysis": [
+      {
+        "parameter_name": "sample string",
+        "trend_type": "sample string",
+        "description": "sample string",
+        "risk_level": "sample string"
+      }
+    ],
+    "anomalies": [
+      {
+        "parameter_name": "sample string",
+        "anomaly_type": "sample string",
+        "description": "sample string",
+        "severity": "sample string"
+      }
+    ]
+  }
+}
